@@ -1,0 +1,279 @@
+openapi: 3.0.1
+
+servers:
+    -   url: 'http://localhost:8080/'
+        description: for local development
+
+info:
+    title: Weblap
+    version: 0.1.0
+
+tags:
+    -   name: Authentication v1
+    -   name: Note v1
+
+paths:
+    /api/v1/auth/register:
+        post:
+            summary: Register a new user
+            operationId: register
+            tags:
+                - Authentication v1
+            requestBody:
+                description: Registration request body
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - username
+                                - password
+                                - email
+                            properties:
+                                username:
+                                    type: string
+                                    nullable: false
+                                    maxLength: 255
+                                    pattern: '^[a-zA-Z0-9-_.]+$'
+                                password:
+                                    type: string
+                                email:
+                                    type: string
+                                    maxLength: 255
+                                    format: email
+            responses:
+                '201':
+                    description: User registered successfully
+                '400':
+                    $ref: '#/components/responses/Error400MessageResponse'
+                '403':
+                    $ref: '#/components/responses/Error403MessageResponse'
+                '500':
+                    $ref: '#/components/responses/Error500MessageResponse'
+
+    /api/v1/auth/login:
+        post:
+            summary: Login request
+            operationId: login
+            tags:
+                - Authentication v1
+            requestBody:
+                description: Login request body
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                username:
+                                    type: string
+                                password:
+                                    type: string
+            responses:
+                '200':
+                    description: Login response
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    token:
+                                        type: string
+                '400':
+                    $ref: '#/components/responses/Error400MessageResponse'
+                '403':
+                    $ref: '#/components/responses/Error403MessageResponse'
+                '500':
+                    $ref: '#/components/responses/Error500MessageResponse'
+
+    /api/v1/note:
+        get:
+            summary: Get all notes for the user
+            operationId: getNotes
+            tags:
+                - Note v1
+            security:
+                -   bearerAuth: [ ]
+            responses:
+                '200':
+                    description: A list of notes
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    notes:
+                                        type: array
+                                        items:
+                                            type: object
+                                            required:
+                                                - id
+                                                - title
+                                                - modified
+                                            properties:
+                                                id:
+                                                    type: string
+                                                    format: uuid
+                                                title:
+                                                    type: string
+                                                modified:
+                                                    type: string
+                                                    format: date-time
+                '400':
+                    $ref: '#/components/responses/Error400MessageResponse'
+                '401':
+                    $ref: '#/components/responses/Error401MessageResponse'
+                '403':
+                    $ref: '#/components/responses/Error403MessageResponse'
+                '500':
+                    $ref: '#/components/responses/Error500MessageResponse'
+        post:
+            summary: Create a new note
+            operationId: createNote
+            tags:
+                - Note v1
+            security:
+                -   bearerAuth: [ ]
+            requestBody:
+                description: Note content to be created
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - title
+                            properties:
+                                title:
+                                    type: string
+                                    maxLength: 255
+            responses:
+                '201':
+                    description: Note created successfully
+                '400':
+                    $ref: '#/components/responses/Error400MessageResponse'
+                '401':
+                    $ref: '#/components/responses/Error401MessageResponse'
+                '403':
+                    $ref: '#/components/responses/Error403MessageResponse'
+                '500':
+                    $ref: '#/components/responses/Error500MessageResponse'
+        patch:
+            summary: Update note checked state
+            operationId: updateNoteChecked
+            tags:
+                - Note v1
+            security:
+                -   bearerAuth: [ ]
+            requestBody:
+                description: Patch payload containing the note UUID and the new checked state
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - id
+                                - checked
+                            properties:
+                                id:
+                                    type: string
+                                    format: uuid
+                                    description: UUID of the note to update
+                                checked:
+                                    type: boolean
+                                    description: New checked state for the note
+            responses:
+                '200':
+                    description: Note update successfully
+                '400':
+                    $ref: '#/components/responses/Error400MessageResponse'
+                '401':
+                    $ref: '#/components/responses/Error401MessageResponse'
+                '403':
+                    $ref: '#/components/responses/Error403MessageResponse'
+                '500':
+                    $ref: '#/components/responses/Error500MessageResponse'
+        delete:
+            summary: Delete a note by ID
+            operationId: deleteNoteById
+            tags:
+                - Note v1
+            security:
+                -   bearerAuth: [ ]
+            parameters:
+                -   name: id
+                    in: query
+                    description: The ID of the note to delete
+                    required: true
+                    schema:
+                        type: string
+                        format: uuid
+            responses:
+                '200':
+                    description: Note deleted successfully
+                '400':
+                    $ref: '#/components/responses/Error400MessageResponse'
+                '401':
+                    $ref: '#/components/responses/Error401MessageResponse'
+                '403':
+                    $ref: '#/components/responses/Error403MessageResponse'
+                '500':
+                    $ref: '#/components/responses/Error500MessageResponse'
+
+components:
+    securitySchemes:
+        bearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+
+    responses:
+        Error400MessageResponse:
+            description: Not found
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorMessageResponse'
+        Error401MessageResponse:
+            description: Unauthorized
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorMessageResponse'
+        Error403MessageResponse:
+            description: Forbidden
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorMessageResponse'
+        Error500MessageResponse:
+            description: Internal server error
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorMessageResponse'
+
+    schemas:
+        ErrorMessageResponse:
+            type: object
+            required:
+                - status
+                - errors
+            properties:
+                status:
+                    type: integer
+                errors:
+                    type: array
+                    items:
+                        type: string
+
+        MessageResponse:
+            type: object
+            required:
+                - message
+            properties:
+                message:
+                    type: string
+                    example: OK
