@@ -24,3 +24,19 @@ VALUES ('01992abc-3c1c-7305-bf26-c5fdb14ff813'::uuid,
         '2025-09-08T19:10:03.480678+00'::timestamptz,
         '2025-09-08T19:10:03.480678+00'::timestamptz,
         'ADMIN');
+
+INSERT INTO notes (id, user_id, title, checked, created_at, updated_at)
+VALUES ('01992abc-3c1c-7305-bf26-c5fdb14ff811'::uuid,
+        '01992abc-3c1c-7305-bf26-c5fdb14ff811'::uuid,
+        'Example title 1',
+        'false',
+        '2025-09-08T19:10:03.480678+00'::timestamptz,
+        '2025-09-08T19:10:03.480678+00'::timestamptz);
+
+INSERT INTO notes (id, user_id, title, checked, created_at, updated_at)
+VALUES ('01992abc-3c1c-7305-bf26-c5fdb14ff812'::uuid,
+        '01992abc-3c1c-7305-bf26-c5fdb14ff811'::uuid,
+        'Example title 2',
+        'true',
+        '2025-09-08T19:10:03.480678+00'::timestamptz,
+        '2025-09-08T19:10:03.480678+00'::timestamptz);

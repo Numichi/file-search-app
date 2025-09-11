@@ -1,4 +1,4 @@
-package com.example.demo.config.filter;
+package com.example.demo.config.security;
 
 import com.example.demo.service.JwtService;
 import io.opentelemetry.api.trace.Span;

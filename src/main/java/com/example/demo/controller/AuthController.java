@@ -8,10 +8,12 @@ import com.example.model.LoginRequest;
 import com.example.model.RegisterRequest;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class AuthController implements AuthenticationV1Api {
@@ -22,16 +24,22 @@ public class AuthController implements AuthenticationV1Api {
     @Override
     @Observed
     public ResponseEntity<Login200Response> login(LoginRequest loginRequest) {
+        log.info("Login attempt for user: {}", loginRequest.getUsername());
+
         var token = userService.login(loginRequest.getUsername(), loginRequest.getPassword());
         var response = Login200Response.builder().token(token).build();
+        log.info("User {} logged in successfully", loginRequest.getUsername());
+
         return ResponseEntity.ok(response);
     }
 
     @Override
     @Observed
     public ResponseEntity<Void> register(RegisterRequest registerRequest) {
+        log.info("Registration attempt for user: {}", registerRequest.getUsername());
         userService.register(userMapper.toDTO(registerRequest));
+
+        log.info("User {} registered successfully", registerRequest.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
-

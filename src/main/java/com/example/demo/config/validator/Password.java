@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Password {
-    String message() default "The password must be at least 8 characters long, contain uppercase and lowercase letters, numbers, special characters.";
+    String message() default "the password must be at least 8 characters long, contain uppercase and lowercase letters, numbers, special characters";
 
     Class<?>[] groups() default {};
 

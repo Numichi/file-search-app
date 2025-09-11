@@ -1,44 +1,49 @@
+server:
+  port: ${SERVER_PORT:8080}
+
 spring:
-    application:
-        name: Weblap
+  application:
+    name: Weblap
+  datasource:
+    url: ${DB_URI:jdbc:postgresql://localhost:5432/dev}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
 
-    datasource:
-        url: ${DB_URI:jdbc:postgresql://localhost:5432/dev}
-        username: ${DB_USER:postgres}
-        password: ${DB_PASS:postgres}
-        driver-class-name: org.postgresql.Driver
-    jpa:
-        hibernate:
-            ddl-auto: validate
-        database-platform: org.hibernate.dialect.PostgreSQLDialect
-
-    liquibase:
-        change-log: classpath:database/master.xml
-
-jwt:
-    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-
-springdoc:
-    api-docs:
-        path: /api/openapi
-    swagger-ui:
-        layout: BaseLayout
-        path: /api/swagger
-        url: /api/openapi.yaml
+  liquibase:
+    change-log: classpath:database/master.xml
 
 management:
+  observations:
+    annotations:
+      # used: org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration.ObservedAspectConfiguration
+      # @ConditionalOnBooleanProperty("management.observations.annotations.enabled")
+      enabled: true
+  otlp:
     tracing:
-        sampling:
-            probability: 1.0
-    endpoint:
-        health:
-            show-details: always
-    endpoints:
-        web:
-            base-path: /actuator
-            exposure:
-                include: '*'
-    server:
-        port: ${MANAGEMENT_PORT:8081}
-server:
-    port: ${SERVER_PORT:8081}
+      endpoint: http://localhost:4317
+      transport: grpc
+  tracing:
+    sampling:
+      probability: 1.0
+    enabled: true
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info,prometheus,metrics
+  server:
+    port: ${MANAGEMENT_PORT:8081}
+
+# ===== Used by @Value =====
+jwt:
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+swagger:
+  enabled: true

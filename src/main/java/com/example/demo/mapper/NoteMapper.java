@@ -7,7 +7,6 @@ import com.example.model.CreateNoteRequest;
 import com.example.model.GetNotes200ResponseNotesInner;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,12 +26,6 @@ public interface NoteMapper extends CommonMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Note toNewEntity(NewNoteWrapper wrapper);
-
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "user", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    void updateEntity(@MappingTarget Note entity, NoteDto dto);
 
     @Mapping(target = "modified", source = "updatedAt")
     NoteDto toDto(Note entity);

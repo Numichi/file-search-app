@@ -13,15 +13,15 @@ import static org.hamcrest.Matchers.notNullValue;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class Common {
 
-    public static Header getTestUserHeaderToken(UserEnum userEnum) {
-        return getTestUserHeaderToken(Common.getTestUserToken(userEnum));
+    public static Header getAuthenticationBearerHeader(UserEnum userEnum) {
+        return getAuthenticationBearerHeader(Common.getAuthenticationJwtToken(userEnum));
     }
 
-    public static Header getTestUserHeaderToken(String token) {
+    public static Header getAuthenticationBearerHeader(String token) {
         return new Header(HttpHeaders.AUTHORIZATION, "Bearer " + token);
     }
 
-    public static String getTestUserToken(UserEnum userEnum) {
+    public static String getAuthenticationJwtToken(UserEnum userEnum) {
         return getTokenForUser(userEnum);
     }
 

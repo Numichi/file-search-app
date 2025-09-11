@@ -4,7 +4,7 @@ import com.example.demo.exceptions.base.HttpUnauthorizedException;
 import com.example.demo.service.AuthenticationService;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationHandler;
-import io.opentelemetry.api.trace.Span;
+import io.micrometer.tracing.Tracer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -14,13 +14,20 @@ import org.springframework.stereotype.Component;
 public class UsernameTagObservationHandler implements ObservationHandler<Observation.Context> {
 
     private final AuthenticationService authenticationService;
+    private final Tracer tracer;
 
     @Override
     public void onStart(@NonNull Observation.Context context) {
+        var span = tracer.currentSpan();
+
+        if (span == null) {
+            return;
+        }
+
         try {
-            Span.current().setAttribute("user-id", authenticationService.getUsername());
+            span.tag("user-id", authenticationService.getUsername());
         } catch (HttpUnauthorizedException e) {
-            Span.current().setAttribute("user-id", "n/a");
+            span.tag("user-id", "n/a");
         }
     }
 

@@ -2,16 +2,15 @@ package com.example.demo.config;
 
 import com.example.api.AuthenticationV1Api;
 import com.example.api.NoteV1Api;
-import com.example.demo.config.filter.JwtAuthFilter;
 import com.example.demo.config.security.CustomAccessDeniedHandler;
 import com.example.demo.config.security.CustomAuthenticationEntryPoint;
+import com.example.demo.config.security.JwtAuthFilter;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.passay.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -41,22 +40,26 @@ public class SecurityConfig {
     };
 
     private final String[] permitAllPaths = {
-        "/api/openapi.yaml",
-        "/api/swagger",
-        "/api/swagger-ui.html",
-        "/swagger-ui/**",
-        "/v3/api-docs/**"
+        "/openapi.yaml",
+        "/swagger.html",
+        "/actuator",
+        "/actuator/**",
     };
 
     private final String[] roleUserPaths = {
         NoteV1Api.PATH_CREATE_NOTE,
         NoteV1Api.PATH_GET_NOTES,
-        NoteV1Api.PATH_DELETE_NOTE_BY_ID
+        NoteV1Api.PATH_DELETE_NOTE_BY_ID,
+        NoteV1Api.PATH_UPDATE_NOTE_CHECKED
     };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+
         return http
+            .cors(AbstractHttpConfigurer::disable)
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(permitAllPaths).permitAll()
@@ -69,16 +72,9 @@ public class SecurityConfig {
                 .accessDeniedHandler(accessDeniedHandler)
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider())
+            .authenticationProvider(authProvider)
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
-    }
-
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
     }
 
     @Bean

@@ -29,7 +29,7 @@ repositories {
 }
 
 configurations {
-    all {
+    configureEach {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
 
@@ -47,16 +47,8 @@ dependencies {
     implementation 'org.bouncycastle:bcpkix-jdk18on:1.81' // For Argon2
     implementation 'org.passay:passay:1.6.6' // For password policy
 
-    // Database Migration
-    implementation 'org.liquibase:liquibase-core'
-    runtimeOnly 'org.postgresql:postgresql'
-
     // UUID generation tool (contains UUIDv7)
     implementation 'com.github.f4b6a3:uuid-creator:6.1.1'
-
-    // OpenAPI and Swagger UI
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.12'
-    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
 
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.13.0'
@@ -65,13 +57,14 @@ dependencies {
 
     // Logging
     implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+    implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.25.1' // For SLF4J bridge
     implementation 'com.lmax:disruptor:4.0.0' // For Async logging with Log4j2
 
     // Micrometer and Prometheus
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-tracing-bridge-otel' // Micrometer Tracing with OpenTelemetry
     implementation 'io.opentelemetry:opentelemetry-exporter-otlp' // OTLP exporter
-    runtimeOnly 'io.micrometer:micrometer-registry-otlp'
+    // runtimeOnly 'io.micrometer:micrometer-registry-otlp'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
     // MapStruct and Lombok
@@ -80,9 +73,15 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
-    // Lombok for tests
-    testCompileOnly 'org.projectlombok:lombok:1.18.34'
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.34"
+
+
+    // Database Migration
+    implementation 'org.liquibase:liquibase-core'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Jackson Support
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.7'
 
     // Tests - core and security
     testImplementation 'org.springframework.boot:spring-boot-starter-test' // For testing core
@@ -95,6 +94,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-testcontainers' // Testcontainers integration base
     testImplementation 'org.testcontainers:junit-jupiter' // JUnit 5 Testcontainers support
     testImplementation 'org.testcontainers:postgresql' // PostgreSQL Testcontainer
+    // Test - Lombok
+    testCompileOnly 'org.projectlombok:lombok:1.18.34'
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.34"
     // Test - other tools
     testImplementation 'net.datafaker:datafaker:2.4.4' // For generating fake data
     testImplementation 'org.instancio:instancio-junit:5.5.1' // For generating random test data
@@ -140,25 +142,18 @@ jacocoTestCoverageVerification {
 
 openApiGenerate {
     generatorName = "spring"
-    inputSpec = "${rootProject.rootDir}/src/main/resources/openapi/server.yaml"
+    inputSpec = "${rootProject.rootDir}/src/main/resources/openapi/openapi.yaml"
     outputDir = layout.buildDirectory.dir("generated").get().asFile.absolutePath
     apiPackage = "com.example.api"
     invokerPackage = "com.example.invoker"
     modelPackage = "com.example.model"
     configOptions = [
-            "useTags"             : "true",
-            "generateBuilders"    : "true",
-            "interfaceOnly"       : "true",
-            "skipDefaultInterface": "true",
-            "booleanGetterPrefix" : "is",
-            "useSpringBoot3"      : "true",
-            "typeMappings"        : "OffsetDateTime=Instant",
-            "importMappings"      : "java.time.OffsetDateTime=java.time.Instant"
-    ]
-    typeMappings = [
-            "OffsetDateTime": "Instant"
-    ]
-    importMappings = [
-            "java.time.OffsetDateTime": "java.time.Instant"
+            "useTags"              : "true",
+            "generateBuilders"     : "true",
+            "interfaceOnly"        : "true",
+            "skipDefaultInterface" : "true",
+            "booleanGetterPrefix"  : "is",
+            "useSpringBoot3"       : "true",
+            "documentationProvider": "none",
     ]
 }
