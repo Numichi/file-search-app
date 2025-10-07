@@ -1,4 +1,4 @@
-package com.github.numichi.controllers;
+package com.github.numichi.controllers.advice;
 
 import com.github.numichi.generated.openapi.model.ErrorMessageResponse;
 import jakarta.validation.ConstraintViolationException;

@@ -11,7 +11,7 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <column name="user" type="VARCHAR(255)">
+            <column name="linux_user" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="ext" type="VARCHAR(255)">

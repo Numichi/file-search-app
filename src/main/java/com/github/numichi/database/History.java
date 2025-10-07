@@ -1,16 +1,17 @@
 package com.github.numichi.database;
 
-import com.github.numichi.config.generator.Uuid7;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Entity representing a search history record.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,11 +21,10 @@ import java.util.UUID;
 public class History {
 
     @Id
-    @Uuid7
     private UUID id;
 
-    @Column(nullable = false)
-    private String user;
+    @Column(name = "linux_user", nullable = false)
+    private String linuxUser;
 
     @Column(nullable = false)
     private String ext;
@@ -35,7 +35,7 @@ public class History {
     @Column(nullable = false)
     private String result;
 
-    @CreatedDate
+    // @CreatedDate //TODO: check why doesn't work
     @Column(name = "created_at")
     private Instant createdAt;
 }

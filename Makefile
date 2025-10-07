@@ -11,7 +11,7 @@ POSTGRES_PORT=5432
 
 CONTAINER_ENGINE := $(shell command -v podman 2> /dev/null)
 
-.PHONY: build run
+.PHONY: run build start
 
 build:
 	$(CONTAINER_ENGINE) build \
@@ -20,7 +20,7 @@ build:
 	  -v /run/podman/podman.sock:/var/run/podman.sock:Z \
 	  -t $(IMAGE_NAME):latest .
 
-run: build
+start:
 	# The "ss" is "Socket Statictics" command, which is used to check for open ports.
 	# -l: listen; -n: show numerical addresses; -t: TCP sockets
 	@if ss -lnt | grep -q -E ':($(APP_PORT_1)|$(APP_PORT_2))\b'; then \
@@ -44,6 +44,7 @@ run: build
 		-e SPRING_DATASOURCE_USERNAME=$(POSTGRES_USER) \
 		-e SPRING_DATASOURCE_PASSWORD=$(POSTGRES_PASSWORD) \
 		-p $(APP_PORT_1):8080 \
+		--user user1 \
 		$(IMAGE_NAME)
 
 	podman run -d --rm --name $(APP_NAME)-2 \
@@ -51,4 +52,7 @@ run: build
 		-e SPRING_DATASOURCE_USERNAME=$(POSTGRES_USER) \
 		-e SPRING_DATASOURCE_PASSWORD=$(POSTGRES_PASSWORD) \
 		-p $(APP_PORT_2):8080 \
+		--user user2 \
 		$(IMAGE_NAME)
+
+run: build start

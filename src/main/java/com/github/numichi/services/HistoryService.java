@@ -6,7 +6,6 @@ import com.github.numichi.mapper.HistoryMapper;
 import com.github.numichi.model.SearchLog;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +31,6 @@ public class HistoryService {
      * @param fileExtension The file extension that was searched for.
      * @param result The list of found file names.
      */
-    @Async
     @Transactional
     public void save(String startPath, String fileExtension, List<String> result) {
         var log = new SearchLog(currentLinuxUser, startPath, fileExtension, result, null);

@@ -6,6 +6,9 @@ import org.springframework.stereotype.Component;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Service for checking read and execute permissions on directories.
+ */
 @Component
 public class PermissionScanner {
 

@@ -2,6 +2,7 @@ package com.github.numichi.controllers;
 
 import com.github.numichi.base.BeanTestConfiguration;
 import com.github.numichi.base.TestContainerConfig;
+import com.github.numichi.database.HistoryRepository;
 import com.github.numichi.exceptions.DirectoryAccessException;
 import com.github.numichi.services.PermissionScanner;
 import io.restassured.RestAssured;
@@ -9,6 +10,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
@@ -20,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 
@@ -36,10 +39,14 @@ public class SearchControllerTest  extends TestContainerConfig {
     @MockitoSpyBean
     private PermissionScanner permissionScanner;
 
+    @Autowired
+    private HistoryRepository historyRepository;
+
     private Path nestedDir;
 
     @BeforeEach
     void setUp() throws IOException {
+        historyRepository.deleteAll();
         RestAssured.port = port;
 
         var subDir1 = Files.createDirectory(tempDir.resolve("subdir1"));
@@ -56,7 +63,7 @@ public class SearchControllerTest  extends TestContainerConfig {
     }
 
     @Test
-    void registrationProcessHappyPath() {
+    void shouldReceiveAndSaveSearchHistory() {
         //@formatter:off
         RestAssured.given()
             .accept(ContentType.JSON)
@@ -69,6 +76,8 @@ public class SearchControllerTest  extends TestContainerConfig {
             .body("results", contains("file1.txt", "file2.txt", "file3.txt", "file4.txt"))
             .body("errors", empty());
         //@formatter:on
+
+        assertEquals(1, historyRepository.count());
     }
 
     @Test
