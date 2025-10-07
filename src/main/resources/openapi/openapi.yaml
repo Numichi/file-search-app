@@ -1,79 +1,51 @@
 openapi: 3.0.1
 
 servers:
-  - url: 'http://localhost:8080/'
-    description: for local development
+  - url: 'http://localhost:8081/'
+    description: Instance 1
+  - url: 'http://localhost:8082/'
+    description: Instance 2
 
 info:
-  title: Weblap
+  title: FileSearchEngine API
   version: 0.1.0
 
 tags:
-  - name: Authentication v1
-  - name: Note v1
+  - name: Search v1
+    description: Base of search endpoints
+  - name: History v1
+    description: Base of history endpoints
 
 paths:
-  /api/v1/auth/register:
-    post:
-      summary: Register a new user
-      operationId: register
+  /api/v1/unique:
+    get:
+      summary: Get all the unique file names from specific path to end.
+      operationId: getUnique
       tags:
-        - Authentication v1
-      requestBody:
-        description: Registration request body
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - username
-                - password
-                - email
-              properties:
-                username:
-                  type: string
-                  nullable: false
-                  maxLength: 255
-                  example: testuser
-                password:
-                  type: string
-                  example: StrongPassword123!
-                email:
-                  type: string
-                  maxLength: 255
-                  format: email
-                  example: testuser@domain.com
-      responses:
-        '201':
-          description: User registered successfully
-        '400':
-          $ref: '#/components/responses/Error400MessageResponse'
-        '403':
-          $ref: '#/components/responses/Error403MessageResponse'
-        '500':
-          $ref: '#/components/responses/Error500MessageResponse'
-
-  /api/v1/auth/login:
-    post:
-      summary: Login request
-      operationId: login
-      tags:
-        - Authentication v1
-      requestBody:
-        description: Login request body
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                username:
-                  type: string
-                  example: testuser
-                password:
-                  type: string
-                  example: StrongPassword123!
+        - Search v1
+      parameters:
+        - in: query
+          name: folder
+          schema:
+            type: string
+          required: true
+          description: The absolute path to the folder where the search will start.
+          example: /home/user/documents
+        - in: query
+          name: ext
+          schema:
+            type: string
+          required: true
+          description: Filter files by extension (e.g., txt, jpg).
+          example: /home/user/documents
+        - in: query
+          name: warn
+          schema:
+            type: boolean
+            default: true
+          required: false
+          description: TODO
+          example: true
       responses:
         '200':
           description: Login response
@@ -82,8 +54,13 @@ paths:
               schema:
                 type: object
                 properties:
-                  token:
-                    type: string
+                  results:
+                    $ref: '#/components/schemas/ResultFileNames'
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                      example: Warning message
         '400':
           $ref: '#/components/responses/Error400MessageResponse'
         '403':
@@ -91,159 +68,30 @@ paths:
         '500':
           $ref: '#/components/responses/Error500MessageResponse'
 
-  /api/v1/note:
+  /api/v1/history:
     get:
-      summary: Get all notes for the user
-      operationId: getNotes
+      summary: Get all the history of searched file names.
+      operationId: getHistory
       tags:
-        - Note v1
-      security:
-        - bearerAuth: [ ]
+        - History v1
       responses:
         '200':
-          description: A list of notes
+          description: History response
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  notes:
+                  histories:
                     type: array
                     items:
-                      type: object
-                      required:
-                        - id
-                        - title
-                        - checked
-                        - modified
-                      properties:
-                        id:
-                          type: string
-                          format: uuid
-                          example: 123e4567-e89b-12d3-a456-426614174000
-                        title:
-                          type: string
-                          example: Sample Note Title
-                        checked:
-                          type: boolean
-                          example: false
-                        modified:
-                          type: string
-                          format: date-time
-                          example: '2023-10-05T14:48:00.000Z'
+                      $ref: '#/components/schemas/HistoryItem'
         '400':
           $ref: '#/components/responses/Error400MessageResponse'
-        '401':
-          $ref: '#/components/responses/Error401MessageResponse'
-        '403':
-          $ref: '#/components/responses/Error403MessageResponse'
-        '500':
-          $ref: '#/components/responses/Error500MessageResponse'
-    post:
-      summary: Create a new note
-      operationId: createNote
-      tags:
-        - Note v1
-      security:
-        - bearerAuth: [ ]
-      requestBody:
-        description: Note content to be created
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - title
-              properties:
-                title:
-                  type: string
-                  maxLength: 255
-                  example: New Note Title
-      responses:
-        '201':
-          description: Note created successfully
-        '400':
-          $ref: '#/components/responses/Error400MessageResponse'
-        '401':
-          $ref: '#/components/responses/Error401MessageResponse'
-        '403':
-          $ref: '#/components/responses/Error403MessageResponse'
-        '500':
-          $ref: '#/components/responses/Error500MessageResponse'
-    patch:
-      summary: Update note checked state
-      operationId: updateNoteChecked
-      tags:
-        - Note v1
-      security:
-        - bearerAuth: [ ]
-      requestBody:
-        description: Patch payload containing the note UUID and the new checked state
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - id
-                - checked
-              properties:
-                id:
-                  type: string
-                  format: uuid
-                  description: UUID of the note to update
-                  example: 123e4567-e89b-12d3-a456-426614174000
-                checked:
-                  type: boolean
-                  description: New checked state for the note
-                  example: true
-      responses:
-        '200':
-          description: Note update successfully
-        '400':
-          $ref: '#/components/responses/Error400MessageResponse'
-        '401':
-          $ref: '#/components/responses/Error401MessageResponse'
-        '403':
-          $ref: '#/components/responses/Error403MessageResponse'
-        '500':
-          $ref: '#/components/responses/Error500MessageResponse'
-    delete:
-      summary: Delete a note by ID
-      operationId: deleteNoteById
-      tags:
-        - Note v1
-      security:
-        - bearerAuth: [ ]
-      parameters:
-        - name: id
-          in: query
-          description: The ID of the note to delete
-          required: true
-          schema:
-            type: string
-            format: uuid
-            example: 123e4567-e89b-12d3-a456-426614174000
-      responses:
-        '200':
-          description: Note deleted successfully
-        '400':
-          $ref: '#/components/responses/Error400MessageResponse'
-        '401':
-          $ref: '#/components/responses/Error401MessageResponse'
-        '403':
-          $ref: '#/components/responses/Error403MessageResponse'
         '500':
           $ref: '#/components/responses/Error500MessageResponse'
 
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
   responses:
     Error400MessageResponse:
       description: Not found
@@ -284,12 +132,23 @@ components:
           items:
             type: string
             example: Detailed error message
-
-    MessageResponse:
+    ResultFileNames:
+      type: array
+      items:
+        type: string
+        example: example.txt
+    HistoryItem:
       type: object
-      required:
-        - message
       properties:
-        message:
+        user:
           type: string
-          example: OK
+          example: linuxuser1
+        timestamp:
+          type: string
+          format: date-time
+          example: '2023-10-05T14:48:00.000Z'
+        ext:
+          type: string
+          example: txt
+        results:
+          $ref: '#/components/schemas/ResultFileNames'

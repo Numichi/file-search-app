@@ -2,8 +2,11 @@ server:
   port: ${SERVER_PORT:8080}
 
 spring:
+  web:
+    resources:
+      static-locations: "classpath:file:/app/javadoc/,file:/app/openapi/"
   application:
-    name: Weblap
+    name: File Search
   datasource:
     url: ${DB_URI:jdbc:postgresql://localhost:5432/dev}
     username: ${DB_USER:postgres}
@@ -16,34 +19,3 @@ spring:
 
   liquibase:
     change-log: classpath:database/master.xml
-
-management:
-  observations:
-    annotations:
-      # used: org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration.ObservedAspectConfiguration
-      # @ConditionalOnBooleanProperty("management.observations.annotations.enabled")
-      enabled: true
-  otlp:
-    tracing:
-      endpoint: http://localhost:4317
-      transport: grpc
-  tracing:
-    sampling:
-      probability: 1.0
-    enabled: true
-  endpoint:
-    health:
-      show-details: always
-  endpoints:
-    web:
-      base-path: /actuator
-      exposure:
-        include: health,info,prometheus,metrics
-  server:
-    port: ${MANAGEMENT_PORT:8081}
-
-# ===== Used by @Value =====
-jwt:
-  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-swagger:
-  enabled: true

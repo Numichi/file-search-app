@@ -6,7 +6,7 @@ plugins {
     id 'org.openapi.generator' version '7.15.0' // For OpenAPI code generation
 }
 
-group = 'com.example'
+group = 'com.github.numichi'
 version = '0.0.1-SNAPSHOT'
 description = 'demo10'
 
@@ -41,7 +41,6 @@ configurations {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.bouncycastle:bcpkix-jdk18on:1.81' // For Argon2
@@ -50,22 +49,10 @@ dependencies {
     // UUID generation tool (contains UUIDv7)
     implementation 'com.github.f4b6a3:uuid-creator:6.1.1'
 
-    // JWT
-    implementation 'io.jsonwebtoken:jjwt-api:0.13.0'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.13.0'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.13.0'
-
     // Logging
     implementation 'org.springframework.boot:spring-boot-starter-log4j2'
     implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.25.1' // For SLF4J bridge
     implementation 'com.lmax:disruptor:4.0.0' // For Async logging with Log4j2
-
-    // Micrometer and Prometheus
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.micrometer:micrometer-tracing-bridge-otel' // Micrometer Tracing with OpenTelemetry
-    implementation 'io.opentelemetry:opentelemetry-exporter-otlp' // OTLP exporter
-    // runtimeOnly 'io.micrometer:micrometer-registry-otlp'
-    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
     // MapStruct and Lombok
     implementation 'org.projectlombok:lombok'
@@ -74,6 +61,8 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
 
+    // OpenAPI
+    implementation "io.swagger.core.v3:swagger-annotations:2.2.38"
 
     // Database Migration
     implementation 'org.liquibase:liquibase-core'
@@ -85,7 +74,6 @@ dependencies {
 
     // Tests - core and security
     testImplementation 'org.springframework.boot:spring-boot-starter-test' // For testing core
-    testImplementation 'org.springframework.security:spring-security-test' // For testing security
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // Test - REST Assured tools
     testImplementation 'io.rest-assured:rest-assured:5.5.6' // For testing REST APIs
@@ -100,8 +88,6 @@ dependencies {
     // Test - other tools
     testImplementation 'net.datafaker:datafaker:2.4.4' // For generating fake data
     testImplementation 'org.instancio:instancio-junit:5.5.1' // For generating random test data
-
-
 }
 
 tasks.named('compileJava') {
@@ -144,9 +130,9 @@ openApiGenerate {
     generatorName = "spring"
     inputSpec = "${rootProject.rootDir}/src/main/resources/openapi/openapi.yaml"
     outputDir = layout.buildDirectory.dir("generated").get().asFile.absolutePath
-    apiPackage = "com.example.api"
-    invokerPackage = "com.example.invoker"
-    modelPackage = "com.example.model"
+    apiPackage = "com.github.numichi.generated.openapi.api"
+    invokerPackage = "com.github.numichi.generated.openapi.invoker"
+    modelPackage = "com.github.numichi.generated.openapi.model"
     configOptions = [
             "useTags"              : "true",
             "generateBuilders"     : "true",
@@ -154,6 +140,6 @@ openApiGenerate {
             "skipDefaultInterface" : "true",
             "booleanGetterPrefix"  : "is",
             "useSpringBoot3"       : "true",
-            "documentationProvider": "none",
+            "documentationProvider": "springdoc",
     ]
 }
