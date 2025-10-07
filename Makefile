@@ -9,12 +9,10 @@ POSTGRES_PASSWORD=apppass
 POSTGRES_DB=appdb
 POSTGRES_PORT=5432
 
-CONTAINER_ENGINE := $(shell command -v podman 2> /dev/null)
-
 .PHONY: run build start
 
 build:
-	$(CONTAINER_ENGINE) build \
+	podman build \
 	  --network host \
 	  --security-opt label=disable \
 	  -v /run/podman/podman.sock:/var/run/podman.sock:Z \
